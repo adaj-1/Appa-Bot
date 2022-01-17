@@ -1,3 +1,4 @@
 .env
 __pycache__/
 discord.log
+howto_requirements.txt
