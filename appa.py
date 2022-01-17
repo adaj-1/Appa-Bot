@@ -1,69 +1,70 @@
 # bot.py
 import os
 import discord
-import random
-import datetime
-import asyncio
-
+import logging
 from discord.ext import commands
 from dotenv import load_dotenv
 
+
+class AppaBot(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    # Greetings
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f"Logged in as {self.bot.user} ({self.bot.user.id})")
+
+    # Reconnect
+    @commands.Cog.listener()
+    async def on_resumed(self):
+        print("Bot has reconnected!")
+
+    # Error Handlers
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        # Uncomment line 26 for printing debug
+        # await ctx.send(error)
+
+        # Unknown command
+        if isinstance(error, commands.CommandNotFound):
+            await ctx.send("Invalid Command!")
+
+        # Bot does not have permission
+        elif isinstance(error, commands.MissingPermissions):
+            await ctx.send("Bot Permission Missing!")
+
+
+# Gateway intents
+intents = discord.Intents.default()
+intents.members = True
+intents.presences = True
+
+# Bot prefix
+bot = commands.Bot(
+    command_prefix=commands.when_mentioned_or("!"),
+    description="Appa Bot",
+    intents=intents,
+)
+
+# Logging
+logger = logging.getLogger("discord")
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
+handler.setFormatter(
+    logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
+)
+logger.addHandler(handler)
+
+# Loading data from .env file
 load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
-GUILD = os.getenv("GUILD_ID")
+token = os.getenv("DISCORD_TOKEN")
 
-bot = commands.Bot(command_prefix="!")
+if __name__ == "__main__":
+    # Load extension
+    for filename in os.listdir("./commands"):
+        if filename.endswith(".py"):
+            bot.load_extension(f"commands.{filename[: -3]}")
 
-
-@bot.command(name="fku", help="Tell Appa to go fuck himself")
-async def fku(ctx):
-    await ctx.send("fuck you too!")
-
-
-@bot.command(name="hort", help="Heads or Tails")
-async def HorT(ctx):
-    appa_images = [discord.File("Head.png"), discord.File("Tail.png")]
-    hort = random.choice(appa_images)
-    await ctx.send(file=hort)
-
-
-@bot.command(name="jail", help='!jail @user "Reason" "Sentence (min)"')
-async def jail(ctx, jailUser: discord.Member, reason, sentence: int):
-    auth_role = ctx.author.roles  # get author roles
-    user_role = jailUser.roles  # get jail user roles
-    jail_role = discord.utils.find(lambda r: r.name == "Jail", ctx.message.guild.roles)
-    if jail_role in user_role:
-        return await ctx.send("{} is already in jail".format(jailUser.mention))
-
-    if sentence < 10:
-        user = jailUser
-        og_role = user_role
-        sentence_min = sentence * 60
-        desc = (
-            "{} has been jailed\nReason: {}\nSentenced to serve: {} minute(s)".format(
-                user.mention, reason, sentence
-            )
-        )
-    else:
-        user = ctx.author
-        og_role = auth_role
-        sentence_min = sentence * 120
-        desc = "Reason: ABUSE OF POWER!!\n Sentenced to serve: {} minute(s)".format(
-            sentence * 2
-        )
-
-    await user.edit(roles=[jail_role])
-    msg = discord.Embed(description=desc, color=0xFF0000)
-    appa_jail = discord.File("Jail.png")
-    await ctx.send(embed=msg, file=appa_jail)
-
-    await asyncio.sleep(sentence_min)
-    await user.edit(roles=og_role)
-    release = discord.Embed(
-        description="{} has been released!".format(user.mention), color=0xFF0000
-    )
-    appa_release = discord.File("Release.jpg")
-    await ctx.send(embed=release, file=appa_release)
-
-
-bot.run(TOKEN)
+    bot.add_cog(AppaBot(bot))
+    bot.run(token, reconnect=True)
