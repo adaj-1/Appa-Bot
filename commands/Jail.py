@@ -36,7 +36,7 @@ class Jail(commands.Cog):
 
         await user.edit(roles=[jail_role])
         jail_msg = discord.Embed(description=desc, color=0xFF0000)
-        appa_jail = discord.File(".\\assets\Jail.png", filename="Jail.png")
+        appa_jail = discord.File(".//assets/Jail.png", filename="Jail.png")
         jail_msg.set_image(url="attachment://Jail.png")
         await ctx.send(file=appa_jail, embed=jail_msg)
 
@@ -45,7 +45,7 @@ class Jail(commands.Cog):
         release_msg = discord.Embed(
             description="{} has been released!".format(user.mention), color=0xFF0000
         )
-        appa_release = discord.File(".\\assets\Release.jpg", filename="Release.jpg")
+        appa_release = discord.File(".//assets/Release.jpg", filename="Release.jpg")
         release_msg.set_image(url="attachment://Release.jpg")
         await ctx.send(file=appa_release, embed=release_msg)
 
