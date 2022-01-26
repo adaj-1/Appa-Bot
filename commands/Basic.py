@@ -18,10 +18,10 @@ class Basic(commands.Cog):
     async def hort_(self, ctx):
         hort = self.coinflip()
         if hort == 1:
-            await ctx.send(file=discord.File(".\\assets\\Head.png"))
+            await ctx.send(file=discord.File(".\\assets\Head.png"))
 
         else:
-            await ctx.send(file=discord.File(".\\assets\\Tail.png"))
+            await ctx.send(file=discord.File(".\\assets\Tail.png"))
 
 
 def setup(bot):
